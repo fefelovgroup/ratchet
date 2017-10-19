@@ -1,12 +1,12 @@
 package processors
 
 import (
-	"database/sql"
 	"errors"
 
-	"github.com/dailyburn/ratchet/data"
-	"github.com/dailyburn/ratchet/logger"
-	"github.com/dailyburn/ratchet/util"
+	"github.com/fefelovgroup/ratchet/data"
+	"github.com/fefelovgroup/ratchet/logger"
+	"github.com/fefelovgroup/ratchet/util"
+	"github.com/jmoiron/sqlx"
 )
 
 // SQLReader runs the given SQL and passes the resulting data
@@ -20,7 +20,7 @@ import (
 // function to NewDynamicSQLReader. This allows you to write whatever code is
 // needed to generate SQL based upon data flowing through the pipeline.
 type SQLReader struct {
-	readDB            *sql.DB
+	readDB            *sqlx.DB
 	query             string
 	sqlGenerator      func(data.JSON) (string, error)
 	BatchSize         int
@@ -33,12 +33,12 @@ type dataErr struct {
 }
 
 // NewSQLReader returns a new SQLReader operating in static mode.
-func NewSQLReader(dbConn *sql.DB, sql string) *SQLReader {
+func NewSQLReader(dbConn *sqlx.DB, sql string) *SQLReader {
 	return &SQLReader{readDB: dbConn, query: sql, BatchSize: 1000}
 }
 
 // NewDynamicSQLReader returns a new SQLReader operating in dynamic mode.
-func NewDynamicSQLReader(dbConn *sql.DB, sqlGenerator func(data.JSON) (string, error)) *SQLReader {
+func NewDynamicSQLReader(dbConn *sqlx.DB, sqlGenerator func(data.JSON) (string, error)) *SQLReader {
 	return &SQLReader{readDB: dbConn, sqlGenerator: sqlGenerator, BatchSize: 1000}
 }
 

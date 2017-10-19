@@ -6,8 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/dailyburn/ratchet/data"
-	"github.com/dailyburn/ratchet/logger"
+	"github.com/fefelovgroup/ratchet/data"
+	"github.com/fefelovgroup/ratchet/logger"
+	"github.com/jmoiron/sqlx"
 	"github.com/kisielk/sqlstruct"
 )
 
@@ -18,14 +19,14 @@ import (
 // returned immediately. It is also possible for errors to occur during execution as data
 // is retrieved from the query. If this happens, the object returned will be a JSON
 // object in the form of {"Error": "description"}.
-func GetDataFromSQLQuery(db *sql.DB, query string, batchSize int, structDest interface{}) (chan data.JSON, error) {
-	stmt, err := db.Prepare(query)
+func GetDataFromSQLQuery(db *sqlx.DB, query string, batchSize int, structDest interface{}) (chan data.JSON, error) {
+	stmt, err := db.Preparex(query)
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query()
+	rows, err := stmt.Queryx()
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func GetDataFromSQLQuery(db *sql.DB, query string, batchSize int, structDest int
 	return dataChan, nil
 }
 
-func scanRowsUsingStruct(rows *sql.Rows, columns []string, structDest interface{}, batchSize int, dataChan chan data.JSON) {
+func scanRowsUsingStruct(rows *sqlx.Rows, columns []string, structDest interface{}, batchSize int, dataChan chan data.JSON) {
 	defer rows.Close()
 
 	tableData := []map[string]interface{}{}
@@ -87,7 +88,7 @@ func scanRowsUsingStruct(rows *sql.Rows, columns []string, structDest interface{
 	close(dataChan) // signal completion to caller
 }
 
-func scanDataGeneric(rows *sql.Rows, columns []string, batchSize int, dataChan chan data.JSON) {
+func scanDataGeneric(rows *sqlx.Rows, columns []string, batchSize int, dataChan chan data.JSON) {
 	defer rows.Close()
 
 	tableData := []map[string]interface{}{}
@@ -190,7 +191,7 @@ func ExecuteSQLQuery(db *sql.DB, query string) error {
 // (or an array of valid objects all with the same keys),
 // where the keys are column names and the
 // the values are SQL values to be inserted into those columns.
-func SQLInsertData(db *sql.DB, d data.JSON, tableName string, onDupKeyUpdate bool, onDupKeyFields []string, batchSize int) error {
+func SQLInsertData(db *sqlx.DB, d data.JSON, tableName string, onDupKeyUpdate bool, onDupKeyFields []string, batchSize int) error {
 	objects, err := data.ObjectsFromJSON(d)
 	if err != nil {
 		return err
@@ -213,7 +214,7 @@ func SQLInsertData(db *sql.DB, d data.JSON, tableName string, onDupKeyUpdate boo
 	return insertObjects(db, objects, tableName, onDupKeyUpdate, onDupKeyFields)
 }
 
-func insertObjects(db *sql.DB, objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyFields []string) error {
+func insertObjects(db *sqlx.DB, objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyFields []string) error {
 	logger.Info("SQLInsertData: building INSERT for len(objects) =", len(objects))
 	insertSQL, vals := buildInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyFields)
 

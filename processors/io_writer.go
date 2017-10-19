@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/dailyburn/ratchet/data"
-	"github.com/dailyburn/ratchet/logger"
-	"github.com/dailyburn/ratchet/util"
+	"github.com/fefelovgroup/ratchet/data"
+	"github.com/fefelovgroup/ratchet/logger"
+	"github.com/fefelovgroup/ratchet/util"
 )
 
 // IoWriter wraps any io.Writer object.

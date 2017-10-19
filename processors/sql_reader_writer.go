@@ -1,9 +1,8 @@
 package processors
 
 import (
-	"database/sql"
-
-	"github.com/dailyburn/ratchet/data"
+	"github.com/fefelovgroup/ratchet/data"
+	"github.com/jmoiron/sqlx"
 )
 
 // SQLReaderWriter performs both the job of a SQLReader and SQLWriter.
@@ -21,7 +20,7 @@ type SQLReaderWriter struct {
 }
 
 // NewSQLReaderWriter returns a new SQLReaderWriter ready for static querying.
-func NewSQLReaderWriter(readConn *sql.DB, writeConn *sql.DB, readQuery, writeTable string) *SQLReaderWriter {
+func NewSQLReaderWriter(readConn *sqlx.DB, writeConn *sqlx.DB, readQuery, writeTable string) *SQLReaderWriter {
 	s := SQLReaderWriter{}
 	s.SQLReader = *NewSQLReader(readConn, readQuery)
 	s.SQLWriter = *NewSQLWriter(writeConn, writeTable)
@@ -29,7 +28,7 @@ func NewSQLReaderWriter(readConn *sql.DB, writeConn *sql.DB, readQuery, writeTab
 }
 
 // NewDynamicSQLReaderWriter returns a new SQLReaderWriter ready for dynamic querying.
-func NewDynamicSQLReaderWriter(readConn *sql.DB, writeConn *sql.DB, sqlGenerator func(data.JSON) (string, error), writeTable string) *SQLReaderWriter {
+func NewDynamicSQLReaderWriter(readConn *sqlx.DB, writeConn *sqlx.DB, sqlGenerator func(data.JSON) (string, error), writeTable string) *SQLReaderWriter {
 	s := NewSQLReaderWriter(readConn, writeConn, "", writeTable)
 	s.sqlGenerator = sqlGenerator
 	return s

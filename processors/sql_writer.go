@@ -1,11 +1,10 @@
 package processors
 
 import (
-	"database/sql"
-
-	"github.com/dailyburn/ratchet/data"
-	"github.com/dailyburn/ratchet/logger"
-	"github.com/dailyburn/ratchet/util"
+	"github.com/fefelovgroup/ratchet/data"
+	"github.com/fefelovgroup/ratchet/logger"
+	"github.com/fefelovgroup/ratchet/util"
+	"github.com/jmoiron/sqlx"
 )
 
 // SQLWriter handles INSERTing data.JSON into a
@@ -19,7 +18,7 @@ import (
 // For use-cases where a SQLWriter instance needs to write to
 // multiple tables you can pass in SQLWriterData.
 type SQLWriter struct {
-	writeDB          *sql.DB
+	writeDB          *sqlx.DB
 	TableName        string
 	OnDupKeyUpdate   bool
 	OnDupKeyFields   []string
@@ -37,7 +36,7 @@ type SQLWriterData struct {
 }
 
 // NewSQLWriter returns a new SQLWriter
-func NewSQLWriter(db *sql.DB, tableName string) *SQLWriter {
+func NewSQLWriter(db *sqlx.DB, tableName string) *SQLWriter {
 	return &SQLWriter{writeDB: db, TableName: tableName, OnDupKeyUpdate: true}
 }
 
