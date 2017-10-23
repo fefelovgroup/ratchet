@@ -1,12 +1,12 @@
 package processors
 
 import (
+	"github.com/jmoiron/sqlx"
 	"errors"
 
 	"github.com/fefelovgroup/ratchet/data"
 	"github.com/fefelovgroup/ratchet/logger"
 	"github.com/fefelovgroup/ratchet/util"
-	"github.com/jmoiron/sqlx"
 )
 
 // SQLReader runs the given SQL and passes the resulting data

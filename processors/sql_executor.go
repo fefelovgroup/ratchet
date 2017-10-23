@@ -1,7 +1,7 @@
 package processors
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"errors"
 
 	"github.com/fefelovgroup/ratchet/data"
@@ -19,18 +19,18 @@ import (
 // function to NewDynamicSQLExecutor. This allows you to write whatever
 // code is needed to generate SQL based upon data flowing through the pipeline.
 type SQLExecutor struct {
-	readDB       *sql.DB
+	readDB       *sqlx.DB
 	query        string
 	sqlGenerator func(data.JSON) (string, error)
 }
 
 // NewSQLExecutor returns a new SQLExecutor
-func NewSQLExecutor(dbConn *sql.DB, sql string) *SQLExecutor {
+func NewSQLExecutor(dbConn *sqlx.DB, sql string) *SQLExecutor {
 	return &SQLExecutor{readDB: dbConn, query: sql}
 }
 
 // NewDynamicSQLExecutor returns a new SQLExecutor operating in dynamic mode.
-func NewDynamicSQLExecutor(dbConn *sql.DB, sqlGenerator func(data.JSON) (string, error)) *SQLExecutor {
+func NewDynamicSQLExecutor(dbConn *sqlx.DB, sqlGenerator func(data.JSON) (string, error)) *SQLExecutor {
 	return &SQLExecutor{readDB: dbConn, sqlGenerator: sqlGenerator}
 }
 
