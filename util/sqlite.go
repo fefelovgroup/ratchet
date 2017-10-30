@@ -38,27 +38,30 @@ batchSize int) error {
 	if err != nil {
 		return err
 	}
-
+	tx:=db.MustBegin()
 	if batchSize > 0 {
 		for i := 0; i < len(objects); i += batchSize {
 			maxIndex := i + batchSize
 			if maxIndex > len(objects) {
 				maxIndex = len(objects)
 			}
-			err = sqliteInsertObjects(db, objects[i:maxIndex], tableName,
+			err = sqliteInsertObjects(tx, objects[i:maxIndex], tableName,
 				onDupKeyUpdate, primaryKeys, preservedFields)
 			if err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
+		tx.Commit()
 		return nil
 	}
-
-	return sqliteInsertObjects(db, objects, tableName, onDupKeyUpdate,
+	tx.Commit()
+	return sqliteInsertObjects(tx, objects, tableName, onDupKeyUpdate,
 		primaryKeys, preservedFields)
+
 }
 
-func sqliteInsertObjects(db *sqlx.DB, objects []map[string]interface{},
+func sqliteInsertObjects(tx *sqlx.Tx, objects []map[string]interface{},
 tableName string, onDupKeyUpdate bool, primaryKeys[]string,
 preservedFields []string) error {
 
@@ -72,8 +75,7 @@ preservedFields []string) error {
 
 	logger.Debug("SQLiteInsertData:", insertSQL)
 	logger.Debug("SQLiteInsertData: values", vals)
-
-	stmt, err := db.Preparex(insertSQL)
+	stmt, err := tx.Preparex(insertSQL)
 
 	if err != nil {
 		logger.Debug("SQLiteInsertData: error preparing SQL")
